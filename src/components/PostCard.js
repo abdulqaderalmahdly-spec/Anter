@@ -1,11 +1,40 @@
 // Anter/src/components/PostCard.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { COLORS } from '../constants/colors';
 import Avatar from './Avatar';
 import { formatDate } from '../utils/formatDate';
+import { likePost, unlikePost } from '../services/posts';
+import { getCurrentUser } from '../services/auth';
 
-const PostCard = ({ post, onLike, onComment, onProfilePress }) => {
+const PostCard = ({ post, onComment, onProfilePress }) => {
+  const currentUser = getCurrentUser();
+  const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUser?.uid));
+  const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
+
+  useEffect(() => {
+    setIsLiked(post.likes?.includes(currentUser?.uid));
+    setLikesCount(post.likes?.length || 0);
+  }, [post.likes, currentUser?.uid]);
+
+  const handleLike = async () => {
+    if (!currentUser) return;
+
+    try {
+      if (isLiked) {
+        await unlikePost(post.id, currentUser.uid);
+        setIsLiked(false);
+        setLikesCount(prev => prev - 1);
+      } else {
+        await likePost(post.id, currentUser.uid);
+        setIsLiked(true);
+        setLikesCount(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('Error handling like:', error);
+    }
+  };
+
   // بيانات وهمية للمستخدم حتى يتم تطبيق نظام المستخدم كاملاً
   const dummyUser = {
     displayName: 'مستخدم تجريبي',
@@ -20,7 +49,7 @@ const PostCard = ({ post, onLike, onComment, onProfilePress }) => {
           <Text style={styles.username}>{dummyUser.displayName}</Text>
           <Text style={styles.timestamp}>{formatDate(post.createdAt)}</Text>
         </View>
-        <TouchableOpacity onPress={() => onProfilePress(post.userId)}>
+        <TouchableOpacity onPress={() => onProfilePress && onProfilePress(post.userId)}>
           <Avatar uri={dummyUser.photoURL} size={40} />
         </TouchableOpacity>
       </View>
@@ -33,7 +62,9 @@ const PostCard = ({ post, onLike, onComment, onProfilePress }) => {
 
       {/* التفاعلات */}
       <View style={styles.actions}>
-        <Text style={styles.actionText}>❤️ {post.likesCount || 0}</Text>
+        <Text style={styles.actionText}>
+          <Text style={{ color: isLiked ? COLORS.danger : COLORS.lightText }}>❤️</Text> {likesCount}
+        </Text>
         <Text style={styles.actionText}>💬 {post.commentsCount || 0}</Text>
       </View>
 
@@ -42,8 +73,10 @@ const PostCard = ({ post, onLike, onComment, onProfilePress }) => {
         <TouchableOpacity style={styles.button} onPress={onComment}>
           <Text style={styles.buttonText}>تعليق</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={onLike}>
-          <Text style={styles.buttonText}>إعجاب</Text>
+        <TouchableOpacity style={styles.button} onPress={handleLike}>
+          <Text style={[styles.buttonText, { color: isLiked ? COLORS.danger : COLORS.primary }]}>
+            {isLiked ? 'إلغاء الإعجاب' : 'إعجاب'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
