@@ -1,0 +1,18 @@
+// Anter/src/navigation/AuthNavigator.js
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
+
+const Stack = createStackNavigator();
+
+const AuthNavigator = () => {
+  return (
+    <Stack.Navigator initialRouteName="Login">
+      <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'تسجيل الدخول' }} />
+      <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'إنشاء حساب' }} />
+    </Stack.Navigator>
+  );
+};
+
+export default AuthNavigator;
