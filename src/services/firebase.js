@@ -3,6 +3,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { setDoc } from 'firebase/firestore'; // تم إضافة setDoc
 
 // يجب استبدال هذه الإعدادات بإعدادات مشروع Firebase الخاص بك
 const firebaseConfig = {
@@ -21,5 +22,6 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+export { setDoc }; // تصدير setDoc
 
 // ملاحظة: يجب على المستخدم استبدال قيم firebaseConfig الفعلية
